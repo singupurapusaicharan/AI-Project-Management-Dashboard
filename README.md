@@ -8,7 +8,7 @@ A sophisticated, enterprise-grade dashboard designed to streamline the managemen
 
 
 - **🔐 Secure User Management**
-  - Role-based access control (RBAC) for enhanced security.  
+  - Role-based access control for enhanced security.  
   - User profile customization and session management.  
 
 - **💼 Project Administration** 
