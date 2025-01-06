@@ -41,8 +41,8 @@ Follow these steps to set up the project locally:
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/singupurapusaicharan/ui-assign-2.git
-cd ui-assign-2
+git clone https://github.com/singupurapusaicharan/ui-assignmemt-2.git
+cd ui-assignment-2
 ```
 
 ### 2. Install Dependencies
