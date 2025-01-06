@@ -67,7 +67,7 @@ npm start
 
 ```plaintext
 Directory structure:
-└── ui-assign-2/                     # Root directory of the project
+└── ui-assignment-2/                     # Root directory of the project
     ├── README.md                       # Project documentation and overview
     ├── components.json                 # Configuration for UI components (shadcn/ui)
     ├── next.config.js                  # Next.js configuration file
