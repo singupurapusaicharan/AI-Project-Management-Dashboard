@@ -32,8 +32,7 @@ A sophisticated, enterprise-grade dashboard designed to streamline the managemen
 | Styling               | Tailwind CSS        |
 | State Management      | Zustand             |
 | Animations            | Framer Motion       |
-
----
+| Database              | MySQL               |
 
 ## 🚀 Getting Started
 
@@ -41,7 +40,7 @@ Follow these steps to set up the project locally:
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/singupurapusaicharan/ui-assignmemt-2.git
+git clone https://github.com/singupurapusaicharan/AI-Project-Management-Dashboard.git
 cd ui-assignment-2
 ```
 
@@ -67,67 +66,135 @@ npm start
 
 ```plaintext
 Directory structure:
-└── ui-assignment-2/                     # Root directory of the project
-    ├── README.md                       # Project documentation and overview
-    ├── components.json                 # Configuration for UI components (shadcn/ui)
-    ├── next.config.js                  # Next.js configuration file
-    ├── package.json                    # Project dependencies and scripts
-    ├── postcss.config.js               # PostCSS configuration for Tailwind CSS
-    ├── tailwind.config.ts              # Tailwind CSS configuration file
-    ├── tsconfig.json                   # TypeScript configuration file
-    ├── .eslintrc.json                  # ESLint configuration for code linting
-    ├── app/                            # Next.js app directory (pages and layouts)
-    │   ├── globals.css                 # Global CSS styles for the application
-    │   ├── layout.tsx                  # Root layout component for the app
-    │   ├── page.tsx                    # Home page (redirects to /dashboard)
-    │   ├── dashboard/                  # Dashboard-related pages
-    │   │   ├── layout.tsx              # Layout for the dashboard section
-    │   │   ├── page.tsx                # Dashboard main page (AI Overview)
-    │   │   ├── account/                # Account management section
-    │   │   │   └── page.tsx            # Account settings and payment history page
-    │   │   └── manage/                 # Project management section
-    │   │       └── page.tsx            # Manage projects page (upload and list)
-    │   └── login/                      # Login page
-    │       └── page.tsx                # User login page
-    ├── components/                     # Reusable React components
-    │   ├── animations/                 # Animation-related components
-    │   │   ├── fade-in.tsx             # Fade-in animation component
-    │   │   ├── scale-in.tsx            # Scale-in animation component
-    │   │   └── slide-in.tsx            # Slide-in animation component
-    │   ├── dashboard/                  # Dashboard-specific components
-    │   │   ├── project-table.tsx       # Table component for displaying projects
-    │   │   ├── account/                # Account-related components
-    │   │   │   ├── account-settings.tsx # Account settings form component
-    │   │   │   └── payment-history.tsx # Payment history table component
-    │   │   └── manage/                 # Project management components
-    │   │       ├── project-list.tsx    # List of existing projects component
-    │   │       └── project-upload.tsx  # Project upload form component
-    │   ├── layout/                     # Layout-related components
-    │   │   ├── logo.tsx                # Logo component with animations
-    │   │   ├── sidebar.tsx             # Sidebar navigation component
-    │   │   └── stars-background.tsx    # Animated stars background component
-    │   └── ui/                         # Reusable UI components
-    │       ├── avatar.tsx              # Avatar component for user profiles
-    │       ├── badge.tsx               # Badge component for status indicators
-    │       ├── button.tsx              # Custom button component
-    │       ├── card.tsx                # Card component for content containers
-    │       ├── input.tsx               # Input field component
-    │       ├── label.tsx               # Label component for form inputs
-    │       ├── logout-button.tsx       # Logout button with animations
-    │       ├── table.tsx               # Table component for data display
-    │       ├── textarea.tsx            # Textarea component for multi-line input
-    │       ├── toast.tsx               # Toast notification component
-    │       └── toaster.tsx             # Toaster component for managing toasts
-    ├── hooks/                          # Custom React hooks
-    │   └── use-toast.ts                # Hook for managing toast notifications
-    └── lib/                            # Utility functions, types, and stores
-        ├── types.ts                    # TypeScript type definitions
-        ├── utils.ts                    # Utility functions (e.g., class name merging)
-        ├── data/                       # Mock data for development
-        │   └── mock-projects.ts        # Mock data for AI projects
-        └── store/                      # Zustand state management stores
-            ├── project-store.ts        # Store for managing project data
-            └── user-store.ts           # Store for managing user data
+└── singupurapusaicharan-ai-project-management-dashboard/  # Root directory of the project
+    ├── README.md                                        # Project documentation and overview
+    ├── components.json                                  # Configuration for UI components
+    ├── next-env.d.ts                                    # TypeScript environment configurations for Next.js
+    ├── next.config.js                                   # Next.js configuration file
+    ├── package.json                                     # Project dependencies and scripts
+    ├── postcss.config.js                                # PostCSS configuration for Tailwind CSS
+    ├── tailwind.config.ts                               # Tailwind CSS configuration file
+    ├── tsconfig.json                                    # TypeScript configuration file
+    ├── .eslintrc.json                                   # ESLint configuration for code linting
+
+    ├── app/                                            # Main application directory for Next.js
+    │   ├── globals.css                                 # Global styles for the app
+    │   ├── layout.tsx                                  # Root layout component for the app
+    │   ├── page.tsx                                    # Home page (redirects to /dashboard)
+    │   ├── dashboard/                                  # Dashboard pages and sections
+    │   │   ├── layout.tsx                              # Layout for the dashboard
+    │   │   ├── page.tsx                                # Dashboard main page (AI overview)
+    │   │   ├── account/                                # Account management section
+    │   │   │   └── page.tsx                            # Account settings and payment history page
+    │   │   ├── insights/                               # Insights and analytics section
+    │   │   │   └── [id]/                               # Dynamic route for specific insights
+    │   │   │       └── page.tsx                        # Individual insight details page
+    │   │   └── manage/                                 # Project management section
+    │   │       └── page.tsx                            # Manage projects page (upload and list)
+    │   ├── login/                                     # Login page
+    │   │   └── page.tsx                               # User login page
+    │   └── signup/                                    # Signup page
+    │       └── page.tsx                               # User signup page
+
+    ├── components/                                    # Reusable React components
+    │   ├── animations/                               # Animation-related components
+    │   │   ├── fade-in.tsx                          # Fade-in animation component
+    │   │   ├── scale-in.tsx                         # Scale-in animation component
+    │   │   └── slide-in.tsx                         # Slide-in animation component
+    │   ├── dashboard/                               # Dashboard-specific components
+    │   │   ├── project-table.tsx                    # Table component for displaying projects
+    │   │   ├── account/                             # Account-related components
+    │   │   │   ├── account-settings.tsx             # User account settings form
+    │   │   │   └── payment-history.tsx              # Payment history table
+    │   │   ├── insights/                            # Insights components
+    │   │   │   ├── activity-logs.tsx                # Logs user activities
+    │   │   │   ├── performance-metrics.tsx          # Displays performance metrics
+    │   │   │   └── usage-statistics.tsx             # Shows project usage statistics
+    │   │   ├── manage/                              # Project management components
+    │   │   │   ├── project-list.tsx                 # List of existing projects
+    │   │   │   └── project-upload.tsx               # Upload new projects form
+    │   │   └── project-table/                       # Components for project tables
+    │   │       ├── index.tsx                        # Main project table component
+    │   │       ├── project-row.tsx                  # Individual project row
+    │   │       └── status-buttons.tsx               # Buttons for project status updates
+    │   ├── layout/                                 # Layout and UI structure components
+    │   │   ├── logo.tsx                            # Logo component with animations
+    │   │   ├── sidebar.tsx                         # Sidebar navigation component
+    │   │   └── stars-background.tsx                # Animated background component
+    │   └── ui/                                     # Reusable UI elements
+    │       ├── accordion.tsx                       # Expandable accordion component
+    │       ├── alert-dialog.tsx                    # Dialog box for alerts
+    │       ├── alert.tsx                           # Simple alert component
+    │       ├── aspect-ratio.tsx                    # Maintains aspect ratio for elements
+    │       ├── avatar.tsx                          # User profile avatar
+    │       ├── badge.tsx                           # Status indicator badge
+    │       ├── breadcrumb.tsx                      # Breadcrumb navigation component
+    │       ├── button.tsx                          # Custom button component
+    │       ├── calendar.tsx                        # Calendar component for scheduling
+    │       ├── card.tsx                            # Card component for content boxes
+    │       ├── carousel.tsx                        # Image carousel component
+    │       ├── chart.tsx                           # Chart component for data visualization
+    │       ├── checkbox.tsx                        # Checkbox UI component
+    │       ├── collapsible.tsx                     # Expand/collapse UI component
+    │       ├── command.tsx                         # Command bar for user actions
+    │       ├── context-menu.tsx                    # Context menu for right-click options
+    │       ├── dialog.tsx                          # Dialog box component
+    │       ├── drawer.tsx                          # Side drawer for UI elements
+    │       ├── dropdown-menu.tsx                   # Dropdown menu component
+    │       ├── form.tsx                            # Form component for user inputs
+    │       ├── hover-card.tsx                      # Hover effect card component
+    │       ├── input-otp.tsx                       # OTP input component
+    │       ├── input.tsx                           # Input field component
+    │       ├── label.tsx                           # Label for form fields
+    │       ├── logout-button.tsx                   # Logout button
+    │       ├── menubar.tsx                         # Menubar for navigation
+    │       ├── navigation-menu.tsx                 # Navigation menu component
+    │       ├── pagination.tsx                      # Pagination controls
+    │       ├── popover.tsx                         # Popover UI component
+    │       ├── progress.tsx                        # Progress bar component
+    │       ├── radio-group.tsx                     # Radio button group
+    │       ├── resizable.tsx                       # Resizable UI component
+    │       ├── scroll-area.tsx                     # Scrollable content area
+    │       ├── select.tsx                          # Select dropdown component
+    │       ├── separator.tsx                       # UI separator line
+    │       ├── sheet.tsx                           # Sheet-style UI component
+    │       ├── skeleton.tsx                        # Skeleton loader for UI elements
+    │       ├── slider.tsx                          # Slider component for input range
+    │       ├── switch.tsx                          # Toggle switch
+    │       ├── table.tsx                           # Table for displaying data
+    │       ├── tabs.tsx                            # Tab navigation component
+    │       ├── textarea.tsx                        # Multi-line input field
+    │       ├── toast.tsx                           # Toast notifications
+    │       ├── toaster.tsx                         # Toaster manager
+    │       ├── toggle-group.tsx                    # Toggle button group
+    │       ├── toggle.tsx                          # Toggle button
+    │       └── tooltip.tsx                         # Tooltip component
+
+    ├── hooks/                                     # Custom React hooks
+    │   └── use-toast.ts                           # Hook for managing toast notifications
+
+    ├── lib/                                       # Utility functions and state management
+    │   ├── types.ts                               # Type definitions
+    │   ├── utils.ts                               # Helper functions
+    │   ├── data/                                  # Mock data for development
+    │   │   └── mock-projects.ts                   # Mock project data
+    │   └── store/                                 # State management using Zustand
+    │       ├── project-store.ts                   # Store for managing project data
+    │       └── user-store.ts                      # Store for managing user data
+
+    ├── server/                                    # Backend server
+    │   ├── server.js                              # Main server file
+    │   ├── config/                                # Server configuration
+    │   │   └── db.js                              # Database connection
+    │   └── routes/                                # API routes
+    │       ├── auth.js                            # Authentication routes
+    │       └── projects.js                        # Project-related routes
+
+    └── supabase/                                  # Supabase configuration for database
+        └── migrations/                            # Database migrations
+            └── 20250127143952_gentle_silence.sql  # SQL migration file
+
+
 ```
 
 ---
