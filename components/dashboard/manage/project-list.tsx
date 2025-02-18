@@ -8,18 +8,32 @@ import { Button } from "@/components/ui/button";
 import { useProjectStore } from "@/lib/store/project-store";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
+import axios from "axios";
 
 export function ProjectList() {
   const { projects, deleteProject } = useProjectStore();
   const { toast } = useToast();
 
-  const handleDelete = (id: string) => {
-    deleteProject(id);
-    toast({
-      title: "Project Deleted",
-      description: "The project has been successfully deleted.",
-      className: "bg-green-700 border-green-800 text-white",
-    });
+  const handleDelete = async (id: string) => {
+    try {
+      // Delete from database first
+      await axios.delete(`http://localhost:5000/api/projects/${id}`);
+      
+      // If successful, update local state
+      deleteProject(id);
+      
+      toast({
+        title: "Success",
+        description: "Project has been successfully deleted.",
+        className: "bg-green-700 border-green-800 text-white",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete project. Please try again.",
+        className: "bg-red-700 border-red-800 text-white",
+      });
+    }
   };
 
   const getStatusColor = (status: string) => {

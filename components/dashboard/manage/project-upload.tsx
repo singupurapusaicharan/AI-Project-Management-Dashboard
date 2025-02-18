@@ -7,8 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useProjectStore } from "@/lib/store/project-store";
+import { useUserStore } from "@/lib/store/user-store";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
+import axios from "axios";
 
 interface FormErrors {
   name?: string;
@@ -21,6 +23,7 @@ export function ProjectUpload() {
   const router = useRouter();
   const { toast } = useToast();
   const addProject = useProjectStore((state) => state.addProject);
+  const user = useUserStore((state) => state.user);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -55,25 +58,41 @@ export function ProjectUpload() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      const newProject = {
-        name: formData.name,
-        description: formData.description,
-        budget: Number(formData.budget),
-        status: "pending" as const,
-        userId: "1"
-      };
+      try {
+        // Create project in the database with the current user's ID
+        const response = await axios.post('http://localhost:5000/api/projects', {
+          name: formData.name,
+          description: formData.description,
+          budget: Number(formData.budget),
+          userId: user.id
+        });
 
-      addProject(newProject);
-      
-      toast({
-        title: "Success!",
-        description: "Project has been created successfully.",
-        className: "bg-green-700 border-green-800 text-white",
-      });
+        // Add project to local state
+        const newProject = {
+          name: formData.name,
+          description: formData.description,
+          budget: Number(formData.budget),
+          status: "pending" as const,
+          userId: user.id
+        };
+        addProject(newProject);
+        
+        toast({
+          title: "Success!",
+          description: "Project has been created successfully.",
+          className: "bg-green-700 border-green-800 text-white",
+        });
 
-      setFormData({ name: "", description: "", budget: "", file: null });
-      setErrors({});
-      router.push("/dashboard");
+        setFormData({ name: "", description: "", budget: "", file: null });
+        setErrors({});
+        router.push("/dashboard");
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to create project. Please try again.",
+          className: "bg-red-700 border-red-800 text-white",
+        });
+      }
     }
   };
 

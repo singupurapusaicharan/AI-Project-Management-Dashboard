@@ -8,6 +8,7 @@ import { useUserStore } from "@/lib/store/user-store";
 import { useProjectStore } from "@/lib/store/project-store";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
+import axios from "axios";
 
 interface FormErrors {
   name?: string;
@@ -34,24 +35,39 @@ export function AccountSettings() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      // Update user info
-      updateUser({
-        name: formData.name.trim(),
-        email: formData.email.trim(),
-        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.name.trim())}`
-      });
-      
-      // Update projects with new user info
-      updateProjectsWithUser();
-      
-      toast({
-        title: "Success",
-        description: "Your account settings have been updated.",
-        className: "bg-green-700 border-green-800 text-white",
-      });
+      try {
+        // Update user in the database
+        await axios.put(`http://localhost:5000/api/auth/users/${user.id}`, {
+          name: formData.name.trim(),
+          email: formData.email.trim()
+        });
+
+        // Update local state
+        updateUser({
+          ...user,
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+        });
+        
+        // Update projects with new user info
+        updateProjectsWithUser();
+        
+        toast({
+          title: "Success",
+          description: "Your account settings have been updated.",
+          className: "bg-green-700 border-green-800 text-white",
+        });
+      } catch (error) {
+        console.error('Update error:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update account settings. Please try again.",
+          className: "bg-red-700 border-red-800 text-white",
+        });
+      }
     }
   };
 

@@ -7,23 +7,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { useUserStore } from "@/lib/store/user-store";
-import { useProjectStore } from "@/lib/store/project-store";
 import { motion } from "framer-motion";
 import { Logo } from "@/components/layout/logo";
 import axios from "axios";
 
 interface FormErrors {
+  name?: string;
   email?: string;
   password?: string;
 }
 
-export default function LoginPage() {
+export default function SignupPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const updateUser = useUserStore((state) => state.updateUser);
-  const { fetchProjects } = useProjectStore();
   const [formData, setFormData] = useState({
+    name: "",
     email: "",
     password: "",
   });
@@ -31,8 +29,10 @@ export default function LoginPage() {
 
   const validateForm = () => {
     const newErrors: FormErrors = {};
+    if (!formData.name) newErrors.name = "Name is required";
     if (!formData.email) newErrors.email = "Email is required";
     if (!formData.password) newErrors.password = "Password is required";
+    else if (formData.password.length < 6) newErrors.password = "Password must be at least 6 characters";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -41,23 +41,18 @@ export default function LoginPage() {
     e.preventDefault();
     if (validateForm()) {
       try {
-        const response = await axios.post('http://localhost:5000/api/auth/login', formData);
-        const userData = response.data;
+        await axios.post('http://localhost:5000/api/auth/register', formData);
         
-        updateUser({
-          id: userData.id,
-          name: userData.name,
-          email: userData.email,
-          avatar: userData.avatar
+        toast({
+          title: "Success",
+          description: "Account created successfully. Please login.",
+          className: "bg-green-700 border-green-800 text-white",
         });
-
-        await fetchProjects();
-        
-        router.push('/dashboard');
+        router.push('/login');
       } catch (error) {
         toast({
           title: "Error",
-          description: "Invalid email or password",
+          description: "Failed to create account. Please try again.",
           className: "bg-red-700 border-red-800 text-white",
         });
       }
@@ -84,11 +79,26 @@ export default function LoginPage() {
         <Card className="glass-effect border-white/10">
           <CardHeader>
             <CardTitle className="text-2xl text-center text-white">
-              Welcome Back
+              Create an Account
             </CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="space-y-2"
+              >
+                <label className="text-sm font-medium text-gray-200">Name</label>
+                <Input
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  className={`bg-white/5 border-white/10 text-white ${errors.name ? "border-red-500" : ""}`}
+                />
+                {errors.name && <p className="text-sm text-red-400">{errors.name}</p>}
+              </motion.div>
+
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -130,7 +140,7 @@ export default function LoginPage() {
                   type="submit" 
                   className="w-full gradient-button"
                 >
-                  Login
+                  Sign Up
                 </Button>
               </motion.div>
 
@@ -140,9 +150,9 @@ export default function LoginPage() {
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5, delay: 0.7 }}
               >
-                Don't have an account?{" "}
-                <Link href="/signup" className="text-blue-400 hover:underline">
-                  Sign Up
+                Already have an account?{" "}
+                <Link href="/login" className="text-blue-400 hover:underline">
+                  Login
                 </Link>
               </motion.p>
             </form>

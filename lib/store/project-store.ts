@@ -1,18 +1,29 @@
 import { create } from 'zustand';
 import { AIProject } from '@/lib/types';
 import { useUserStore } from './user-store';
-import { mockProjects } from '@/lib/data/mock-projects';
+import axios from 'axios';
 
 interface ProjectStore {
   projects: AIProject[];
   addProject: (project: Omit<AIProject, 'id' | 'timestamp' | 'user'>) => void;
   deleteProject: (id: string) => void;
   updateProjectsWithUser: () => void;
+  fetchProjects: () => Promise<void>;
 }
 
 export const useProjectStore = create<ProjectStore>((set) => ({
-  projects: mockProjects,
+  projects: [],
   
+  fetchProjects: async () => {
+    try {
+      const currentUser = useUserStore.getState().user;
+      const response = await axios.get(`http://localhost:5000/api/projects?userId=${currentUser.id}`);
+      set({ projects: response.data });
+    } catch (error) {
+      console.error('Failed to fetch projects:', error);
+    }
+  },
+
   addProject: (projectData) => set((state) => {
     const currentUser = useUserStore.getState().user;
     const newProject = {
@@ -24,7 +35,7 @@ export const useProjectStore = create<ProjectStore>((set) => ({
         hour12: true 
       }),
       user: {
-        id: "1",
+        id: currentUser.id,
         name: currentUser.name,
         email: currentUser.email,
         avatar: currentUser.avatar

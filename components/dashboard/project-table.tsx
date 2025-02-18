@@ -25,7 +25,7 @@ export function ProjectTable({ projects }: ProjectTableProps) {
     <div className="rounded-md border border-white/10">
       <Table>
         <TableHeader>
-          <TableRow className="border-white/10 transition-all duration-300 hover:bg-blue-500/10 hover:backdrop-blur-sm">
+          <TableRow className="border-white/10">
             <TableHead className="text-white">User</TableHead>
             <TableHead className="text-white">Name</TableHead>
             <TableHead className="text-white">Description</TableHead>
@@ -39,11 +39,11 @@ export function ProjectTable({ projects }: ProjectTableProps) {
           {projects.map((project) => (
             <motion.tr
               key={project.id}
-              className="group border-white/10 transition-all duration-300 hover:bg-blue-500/10 hover:backdrop-blur-sm"
+              className="group border-white/10"
               whileHover={{ scale: 1.01 }}
               transition={{ duration: 0.2 }}
             >
-              <TableCell className="text-gray-300 group-hover:text-white">
+              <TableCell className="text-gray-300">
                 <div className="flex items-center gap-3">
                   <Avatar>
                     <AvatarImage src={project.user.avatar} />
@@ -52,13 +52,13 @@ export function ProjectTable({ projects }: ProjectTableProps) {
                   <span>{project.user.name}</span>
                 </div>
               </TableCell>
-              <TableCell className="font-medium text-gray-300 group-hover:text-white">{project.name}</TableCell>
-              <TableCell className="max-w-xs truncate text-gray-300 group-hover:text-white">{project.description}</TableCell>
-              <TableCell className="text-gray-300 group-hover:text-white">{project.timestamp}</TableCell>
+              <TableCell className="font-medium text-gray-300">{project.name}</TableCell>
+              <TableCell className="text-gray-300 whitespace-normal cursor-pointer">{project.description}</TableCell>
+              <TableCell className="text-gray-300">{project.timestamp}</TableCell>
               <TableCell>
                 <Link 
                   href={`/dashboard/insights/${project.id}`}
-                  className="text-blue-400 hover:text-blue-300 flex items-center gap-1"
+                  className="text-blue-400 flex items-center gap-1"
                 >
                   Insights
                   <ChevronRight className="h-4 w-4" />
@@ -71,10 +71,10 @@ export function ProjectTable({ projects }: ProjectTableProps) {
                     size="sm"
                     className={
                       project.status === 'approved'
-                        ? 'bg-green-600 hover:bg-green-600 text-white border-green-600'
+                        ? 'bg-green-600 text-white border-green-600'
                         : project.status === 'pending'
-                        ? 'border-green-600 text-green-400 hover:bg-transparent'
-                        : 'text-gray-400 hover:bg-transparent'
+                        ? 'border-green-600 text-green-400'
+                        : 'text-gray-400'
                     }
                     disabled
                   >
@@ -85,10 +85,10 @@ export function ProjectTable({ projects }: ProjectTableProps) {
                     size="sm"
                     className={
                       project.status === 'rejected'
-                        ? 'bg-red-600 hover:bg-red-600 text-white border-red-600'
+                        ? 'bg-red-600 text-white border-red-600'
                         : project.status === 'pending'
-                        ? 'border-red-600 text-red-400 hover:bg-transparent'
-                        : 'text-gray-400 hover:bg-transparent'
+                        ? 'border-red-600 text-red-400'
+                        : 'text-gray-400'
                     }
                     disabled
                   >
@@ -99,7 +99,7 @@ export function ProjectTable({ projects }: ProjectTableProps) {
               <TableCell>
                 <Badge 
                   variant="outline" 
-                  className="flex items-center gap-1 bg-blue-500/10 border-white/20 backdrop-blur-sm"
+                  className="flex items-center gap-1 bg-blue-500/10 border-white/20"
                 >
                   <span className="text-white font-medium">₹{project.budget.toLocaleString('en-IN')}</span>
                 </Badge>
