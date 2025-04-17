@@ -9,8 +9,8 @@ router.post('/register', async (req, res) => {
     const { name, email, password } = req.body;
     
     // Check if user exists
-    const [existingUser] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
-    if (existingUser.length > 0) {
+    const existingUser = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+    if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
     }
 
@@ -19,13 +19,17 @@ router.post('/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // Create user
-    const [result] = await db.query(
-      'INSERT INTO users (name, email, password, avatar) VALUES (?, ?, ?, ?)',
-      [name, email, hashedPassword, `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`]
+    const result = db.prepare(
+      'INSERT INTO users (name, email, password, avatar) VALUES (?, ?, ?, ?)'
+    ).run(
+      name, 
+      email, 
+      hashedPassword, 
+      `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`
     );
 
     res.status(201).json({ 
-      id: result.insertId,
+      id: result.lastInsertRowid,
       message: 'User registered successfully' 
     });
   } catch (error) {
@@ -40,12 +44,10 @@ router.post('/login', async (req, res) => {
     const { email, password } = req.body;
     
     // Check if user exists
-    const [users] = await db.query('SELECT * FROM users WHERE email = ?', [email]);
-    if (users.length === 0) {
+    const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
+    if (!user) {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
-
-    const user = users[0];
 
     // Validate password
     const isMatch = await bcrypt.compare(password, user.password);
@@ -69,32 +71,30 @@ router.put('/users/:id', async (req, res) => {
     const userId = req.params.id;
 
     // Check if email is already taken by another user
-    const [existingUsers] = await db.query(
-      'SELECT * FROM users WHERE email = ? AND id != ?',
-      [email, userId]
-    );
+    const existingUser = db.prepare(
+      'SELECT * FROM users WHERE email = ? AND id != ?'
+    ).get(email, userId);
     
-    if (existingUsers.length > 0) {
+    if (existingUser) {
       return res.status(400).json({ message: 'Email is already taken' });
     }
 
-    const [result] = await db.query(
-      'UPDATE users SET name = ?, email = ? WHERE id = ?',
-      [name, email, userId]
-    );
+    const result = db.prepare(
+      'UPDATE users SET name = ?, email = ? WHERE id = ?'
+    ).run(name, email, userId);
 
-    if (result.affectedRows === 0) {
+    if (result.changes === 0) {
       return res.status(404).json({ message: 'User not found' });
     }
 
     // Get updated user data
-    const [updatedUser] = await db.query('SELECT * FROM users WHERE id = ?', [userId]);
+    const updatedUser = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
     
-    if (updatedUser.length === 0) {
+    if (!updatedUser) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    const { password: _, ...userData } = updatedUser[0];
+    const { password: _, ...userData } = updatedUser;
     res.json(userData);
   } catch (error) {
     console.error(error);

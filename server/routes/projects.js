@@ -2,75 +2,65 @@ const express = require('express');
 const router = express.Router();
 const db = require('../config/db');
 
-// Get all projects
-router.get('/', async (req, res) => {
+// Get all projects for a user
+router.get('/:userId', (req, res) => {
   try {
-    const userId = req.query.userId;
+    const userId = req.params.userId;
+    const projects = db.prepare('SELECT * FROM projects WHERE user_id = ?').all(userId);
+    res.json(projects);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Create a new project
+router.post('/', (req, res) => {
+  try {
+    const { title, description, userId } = req.body;
     
-    let query = `
-      SELECT p.*, u.name as user_name, u.email as user_email, u.avatar as user_avatar 
-      FROM projects p 
-      JOIN users u ON p.user_id = u.id
-    `;
-    
-    let params = [];
-    if (userId) {
-      query += ` WHERE p.user_id = ?`;
-      params.push(userId);
+    const result = db.prepare(
+      'INSERT INTO projects (title, description, user_id) VALUES (?, ?, ?)'
+    ).run(title, description, userId);
+
+    const newProject = db.prepare('SELECT * FROM projects WHERE id = ?').get(result.lastInsertRowid);
+    res.status(201).json(newProject);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Update a project
+router.put('/:id', (req, res) => {
+  try {
+    const { title, description, status } = req.body;
+    const projectId = req.params.id;
+
+    const result = db.prepare(
+      'UPDATE projects SET title = ?, description = ?, status = ? WHERE id = ?'
+    ).run(title, description, status, projectId);
+
+    if (result.changes === 0) {
+      return res.status(404).json({ message: 'Project not found' });
     }
-    
-    const [projects] = await db.query(query, params);
-    
-    const formattedProjects = projects.map(p => ({
-      id: p.id,
-      name: p.name,
-      description: p.description,
-      timestamp: new Date(p.created_at).toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        hour12: true 
-      }),
-      status: p.status,
-      budget: p.budget,
-      userId: p.user_id,
-      user: {
-        id: p.user_id,
-        name: p.user_name,
-        email: p.user_email,
-        avatar: p.user_avatar
-      }
-    }));
 
-    res.json(formattedProjects);
+    const updatedProject = db.prepare('SELECT * FROM projects WHERE id = ?').get(projectId);
+    res.json(updatedProject);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
   }
 });
 
-// Create project
-router.post('/', async (req, res) => {
+// Delete a project
+router.delete('/:id', (req, res) => {
   try {
-    const { name, description, budget, userId } = req.body;
+    const projectId = req.params.id;
     
-    const [result] = await db.query(
-      'INSERT INTO projects (name, description, budget, status, user_id) VALUES (?, ?, ?, ?, ?)',
-      [name, description, budget, 'pending', userId]
-    );
-
-    res.status(201).json({ message: 'Project created successfully', id: result.insertId });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-// Delete project
-router.delete('/:id', async (req, res) => {
-  try {
-    const [result] = await db.query('DELETE FROM projects WHERE id = ?', [req.params.id]);
+    const result = db.prepare('DELETE FROM projects WHERE id = ?').run(projectId);
     
-    if (result.affectedRows === 0) {
+    if (result.changes === 0) {
       return res.status(404).json({ message: 'Project not found' });
     }
 
