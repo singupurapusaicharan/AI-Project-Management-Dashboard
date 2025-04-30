@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUserStore } from "@/lib/store/user-store";
 import { useProjectStore } from "@/lib/store/project-store";
 import { useToast } from "@/hooks/use-toast";
@@ -20,17 +20,45 @@ export function AccountSettings() {
   const { updateProjectsWithUser } = useProjectStore();
   const { toast } = useToast();
   const [formData, setFormData] = useState({
-    name: user.name,
-    email: user.email,
+    name: user?.name || "",
+    email: user?.email || "",
   });
   const [errors, setErrors] = useState<FormErrors>({});
+
+  // Fetch user data on component load
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/auth/users/${user.id}`);
+        if (response.status === 200) {
+          const userData = response.data;
+          setFormData({
+            name: userData.name,
+            email: userData.email,
+          });
+          updateUser(userData); // Update the user store with fetched data
+        } else {
+          throw new Error("Failed to fetch user data");
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load user data. Please try again.",
+          className: "bg-red-700 border-red-800 text-white",
+        });
+      }
+    };
+
+    fetchUserData();
+  }, [user.id, updateUser, toast]);
 
   const validateForm = () => {
     const newErrors: FormErrors = {};
     if (!formData.name.trim()) newErrors.name = "Name is required";
     if (!formData.email.trim()) newErrors.email = "Email is required";
     else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Invalid email format";
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -40,28 +68,29 @@ export function AccountSettings() {
     if (validateForm()) {
       try {
         // Update user in the database
-        await axios.put(`http://localhost:5000/api/auth/users/${user.id}`, {
-          name: formData.name.trim(),
-          email: formData.email.trim()
-        });
-
-        // Update local state
-        updateUser({
-          ...user,
+        const response = await axios.put(`http://localhost:5000/api/auth/users/${user.id}`, {
           name: formData.name.trim(),
           email: formData.email.trim(),
         });
-        
-        // Update projects with new user info
-        updateProjectsWithUser();
-        
-        toast({
-          title: "Success",
-          description: "Your account settings have been updated.",
-          className: "bg-green-700 border-green-800 text-white",
-        });
+        if (response.status === 200) {
+          // Update local state
+          updateUser({
+            ...user,
+            name: formData.name.trim(),
+            email: formData.email.trim(),
+          });
+          // Update projects with new user info
+          updateProjectsWithUser();
+          toast({
+            title: "Success",
+            description: "Your account settings have been updated.",
+            className: "bg-green-700 border-green-800 text-white",
+          });
+        } else {
+          throw new Error("Failed to update user");
+        }
       } catch (error) {
-        console.error('Update error:', error);
+        console.error("Update error:", error);
         toast({
           title: "Error",
           description: "Failed to update account settings. Please try again.",
@@ -85,27 +114,24 @@ export function AccountSettings() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-200">Name</label>
-              <Input 
+              <Input
                 value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
                 className={`bg-white/5 border-white/10 text-white ${errors.name ? "border-red-500" : ""}`}
               />
               {errors.name && <p className="text-sm text-red-400">{errors.name}</p>}
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-200">Email</label>
-              <Input 
+              <Input
                 type="email"
                 value={formData.email}
-                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
                 className={`bg-white/5 border-white/10 text-white ${errors.email ? "border-red-500" : ""}`}
               />
               {errors.email && <p className="text-sm text-red-400">{errors.email}</p>}
             </div>
-            <Button 
-              type="submit"
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
+            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white">
               Save Changes
             </Button>
           </form>

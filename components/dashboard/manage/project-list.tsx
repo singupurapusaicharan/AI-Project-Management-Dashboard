@@ -16,18 +16,21 @@ export function ProjectList() {
 
   const handleDelete = async (id: string) => {
     try {
-      // Delete from database first
-      await axios.delete(`http://localhost:5000/api/projects/${id}`);
-      
-      // If successful, update local state
-      deleteProject(id);
-      
-      toast({
-        title: "Success",
-        description: "Project has been successfully deleted.",
-        className: "bg-green-700 border-green-800 text-white",
-      });
+      // Delete from database
+      const response = await axios.delete(`http://localhost:5000/api/projects/${id}`);
+      if (response.status === 200) {
+        // Update local state
+        deleteProject(id);
+        toast({
+          title: "Success",
+          description: "Project has been successfully deleted.",
+          className: "bg-green-700 border-green-800 text-white",
+        });
+      } else {
+        throw new Error("Failed to delete project");
+      }
     } catch (error) {
+      console.error("Delete error:", error);
       toast({
         title: "Error",
         description: "Failed to delete project. Please try again.",

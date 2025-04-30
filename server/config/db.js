@@ -1,29 +1,17 @@
-const Database = require('better-sqlite3');
-const path = require('path');
+const mysql = require('mysql2');
+require('dotenv').config();
 
-// Create database connection
-const db = new Database(path.join(__dirname, '../../database.sqlite'));
+const pool = mysql.createPool({
+  host: process.env.DB_HOST,
+  // 192.168.29.170
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
 
-// Create tables if they don't exist
-db.exec(`
-  CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    email TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL,
-    avatar TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  );
+const promisePool = pool.promise();
 
-  CREATE TABLE IF NOT EXISTS projects (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT NOT NULL,
-    description TEXT,
-    status TEXT DEFAULT 'pending',
-    user_id INTEGER,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id)
-  );
-`);
-
-module.exports = db;
+module.exports = promisePool;

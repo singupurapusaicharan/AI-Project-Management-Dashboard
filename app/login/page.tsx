@@ -28,6 +28,7 @@ export default function LoginPage() {
     password: "",
   });
   const [errors, setErrors] = useState<FormErrors>({});
+  const [isLoading, setIsLoading] = useState(false);
 
   const validateForm = () => {
     const newErrors: FormErrors = {};
@@ -40,26 +41,44 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
+      setIsLoading(true);
       try {
         const response = await axios.post('http://localhost:5000/api/auth/login', formData);
-        const userData = response.data;
+        const { success, message, data, errors: serverErrors } = response.data;
         
-        updateUser({
-          id: userData.id,
-          name: userData.name,
-          email: userData.email,
-          avatar: userData.avatar
-        });
+        if (success) {
+          updateUser({
+            id: data.id,
+            name: data.name,
+            email: data.email,
+            avatar: data.avatar
+          });
 
-        await fetchProjects();
-        
-        router.push('/dashboard');
-      } catch (error) {
+          await fetchProjects();
+          
+          toast({
+            title: "Success",
+            description: message,
+            className: "bg-green-700 border-green-800 text-white",
+          });
+          
+          router.push('/dashboard');
+        } else {
+          toast({
+            title: "Error",
+            description: serverErrors?.[0] || "Login failed",
+            className: "bg-red-700 border-red-800 text-white",
+          });
+        }
+      } catch (error: any) {
+        const errorMessage = error.response?.data?.errors?.[0] || "An unexpected error occurred";
         toast({
           title: "Error",
-          description: "Invalid email or password",
+          description: errorMessage,
           className: "bg-red-700 border-red-800 text-white",
         });
+      } finally {
+        setIsLoading(false);
       }
     }
   };
@@ -101,6 +120,7 @@ export default function LoginPage() {
                   value={formData.email}
                   onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                   className={`bg-white/5 border-white/10 text-white ${errors.email ? "border-red-500" : ""}`}
+                  disabled={isLoading}
                 />
                 {errors.email && <p className="text-sm text-red-400">{errors.email}</p>}
               </motion.div>
@@ -117,6 +137,7 @@ export default function LoginPage() {
                   value={formData.password}
                   onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                   className={`bg-white/5 border-white/10 text-white ${errors.password ? "border-red-500" : ""}`}
+                  disabled={isLoading}
                 />
                 {errors.password && <p className="text-sm text-red-400">{errors.password}</p>}
               </motion.div>
@@ -129,8 +150,9 @@ export default function LoginPage() {
                 <Button 
                   type="submit" 
                   className="w-full gradient-button"
+                  disabled={isLoading}
                 >
-                  Login
+                  {isLoading ? "Logging in..." : "Login"}
                 </Button>
               </motion.div>
 
