@@ -41,7 +41,6 @@ Follow these steps to set up the project locally:
 ### 1. Clone the Repository
 ```bash
 git clone https://github.com/singupurapusaicharan/AI-Project-Management-Dashboard.git
-cd ui-assignment-2
 ```
 
 ### 2. Install Dependencies
@@ -206,6 +205,11 @@ The application can be configured through environment variables:
 ```env
 NEXT_PUBLIC_API_URL=your_api_url
 NEXT_PUBLIC_ENV=development
+DB_HOST=your_hostname
+DB_USER=your_username
+DB_PASSWORD=your_password
+DB_NAME=your_databse_name
+PORT=5000
 ```
 
 ---
@@ -258,7 +262,7 @@ Contributions are welcome! Please follow these steps:
 ## 🎥 Demo
 
 Check out the live demo of the project:  
-👉 [View Demo](https://drive.google.com/file/d/1wMhVsEbIVeYaLc3UTbDg4DlNgmy5-D9U/view?usp=sharing)
+👉 [View Demo](https://drive.google.com/file/d/1KCQu0O7c8ZDlj6dVhZvhs4WdEKuWzNQl/view?usp=sharing)
 
 ---
 
